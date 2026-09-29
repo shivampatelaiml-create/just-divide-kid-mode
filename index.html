@@ -3,26 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Just Divide</title>
+<title>Just Divide — Kid Mode</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- The whole game lives in this fixed-size "stage" (1440x1024 design space).
+     main.js scales the stage to fit any browser window. -->
 <main id="game">
 
     <!-- Top icon buttons -->
     <button id="pause-btn" class="icon-btn pause-btn" type="button" aria-label="Pause">
-        <svg viewBox="0 0 24 24" width="20" height="20"><rect x="6" y="5" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 24 24" width="30" height="30"><rect x="6" y="5" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.5" fill="currentColor"/></svg>
     </button>
 
     <button id="help-btn" class="icon-btn help-btn" type="button" aria-label="How to play">?</button>
 
-    <!-- Header -->
+    <!-- Header: title, optional timer, subtitle -->
     <header class="game-header">
         <h1>Just Divide</h1>
 
         <div class="timer">
-            <svg class="hourglass-icon" viewBox="0 0 24 24" width="16" height="16">
+            <svg class="hourglass-icon" viewBox="0 0 24 24" width="26" height="26">
                 <path d="M6 3h12M6 21h12M7 3c0 5 4 6 5 8-1 2-5 3-5 8M17 3c0 5-4 6-5 8 1 2 5 3 5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span id="timer-display">00:00</span>
@@ -31,66 +33,70 @@
         <p class="subtitle">Divide with the numbers to solve the rows and columns.</p>
     </header>
 
-    <!-- Cat + Level/Score -->
-    <div class="cat-badges-row">
-        <img class="cat" src="assets/Cat.svg" alt="Game cat">
+    <!-- Board: 4x4 grid + cat + Level/Score badges -->
+    <section class="board">
 
-        <div class="score-area">
-            <div id="level-badge" class="badge level-badge">
-                <span class="badge-label">Level</span>
-                <strong id="level">1</strong>
-            </div>
+        <div id="grid" class="grid" aria-label="4 by 4 game grid"></div>
 
-            <div id="score-badge" class="badge score-badge">
-                <span class="badge-label">Score</span>
-                <strong id="score">0</strong>
+        <!-- Badges use the supplied badge art (number-free copy); the text is live HTML -->
+        <div id="level-badge" class="badge level-badge">
+            <img src="assets/blank/Levels_and_Score.svg" alt="">
+            <div class="badge-text">
+                <span class="badge-line">LEVEL <strong id="level">1</strong></span>
             </div>
         </div>
-    </div>
 
-    <p class="best-caption">Best: <strong id="best">0</strong></p>
-
-    <!-- Main Game Area -->
-    <section class="game-area">
-
-        <!-- 4x4 Grid -->
-        <div id="grid" class="grid"></div>
-
-        <!-- Right Action Panel -->
-        <aside class="action-panel">
-
-            <div class="panel-section keep-section">
-                <div id="keep-slot" class="keep-slot">
-                    <div id="keep-value" class="keep-value"></div>
-                </div>
-                <div class="panel-label keep-label">Keep</div>
+        <div id="score-badge" class="badge score-badge">
+            <img src="assets/blank/Levels_and_Score.svg" alt="">
+            <div class="badge-text">
+                <span class="badge-line">SCORE: <strong id="score">0</strong></span>
+                <span class="badge-line badge-line-small">BEST: <strong id="best">0</strong></span>
             </div>
+        </div>
 
-            <div id="queue" class="queue"></div>
-
-            <div class="panel-section trash-section">
-                <div class="panel-label trash-label">Trash</div>
-                <div id="trash-slot" class="trash-slot" role="button" tabindex="0" aria-label="Trash tile">
-                    <svg class="trash-icon" viewBox="0 0 24 24" width="20" height="20">
-                        <path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span class="trash-count">X<span id="trash-count">3</span></span>
-                </div>
-            </div>
-
-        </aside>
-
+        <!-- Cat is drawn after the badges so its paws rest on top of them -->
+        <img class="cat" src="assets/Cat.svg" alt="Game cat">
     </section>
 
-    <!-- Controls -->
+    <!-- Right Action Panel: KEEP, upcoming stack, TRASH -->
+    <aside class="action-panel">
+
+        <div class="panel-section keep-section">
+            <div id="keep-slot" class="keep-slot" role="button" tabindex="0" aria-label="Keep tile">
+                <div id="keep-value" class="keep-value"></div>
+            </div>
+            <div class="panel-label keep-label">Keep</div>
+        </div>
+
+        <div id="queue" class="queue" aria-label="Upcoming tiles"></div>
+
+        <div class="panel-section trash-section">
+            <div class="panel-label trash-label">Trash</div>
+            <div id="trash-slot" class="trash-slot" role="button" tabindex="0" aria-label="Trash tile">
+                <svg class="trash-icon" viewBox="0 0 24 24" width="30" height="30">
+                    <path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="trash-count">X<span id="trash-count">3</span></span>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- Controls (also available from the keyboard) -->
     <section class="controls">
-        <button id="undo-btn" type="button">&#8617; Undo</button>
-        <button id="restart-btn" type="button">&#8635; Restart</button>
-        <button id="hint-btn" type="button">&#128161; Hint</button>
+        <button id="undo-btn" type="button" title="Undo (Z)">&#8617; Undo <kbd>Z</kbd></button>
+        <button id="restart-btn" type="button" title="Restart (R)">&#8635; Restart <kbd>R</kbd></button>
+        <button id="hint-btn" type="button" title="Toggle hints (G)" aria-pressed="false">&#128161; Hint <kbd>G</kbd></button>
+
+        <span class="controls-divider" aria-hidden="true"></span>
+
+        <button class="difficulty-btn" data-difficulty="easy" type="button" title="Easy (1)">Easy <kbd>1</kbd></button>
+        <button class="difficulty-btn" data-difficulty="medium" type="button" title="Medium (2)">Medium <kbd>2</kbd></button>
+        <button class="difficulty-btn" data-difficulty="hard" type="button" title="Hard (3)">Hard <kbd>3</kbd></button>
     </section>
 
     <button id="fullscreen-btn" class="icon-btn fullscreen-btn" type="button" aria-label="Toggle fullscreen">
-        <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 1-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
 
 </main>
@@ -99,7 +105,7 @@
 <div id="help-modal" class="modal hidden">
     <div class="modal-card">
         <h2>How To Play</h2>
-        <p>Drag a tile from the queue onto the board. Place it next to a matching or evenly-divisible number to clear both tiles and score points. Use KEEP to save a tile for later, or TRASH it if you're stuck.</p>
+        <p>Drag the top tile of the stack into an empty square. If it touches an equal tile, both disappear. If the bigger number divides evenly by the smaller one, they merge into the answer (12 next to 3 becomes 4). Use KEEP to save a tile for later, or TRASH to throw one away.</p>
         <button id="help-close-btn" type="button">Got it</button>
     </div>
 </div>

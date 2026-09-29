@@ -1,80 +1,80 @@
 /* =========================================================
-   JUST DIVIDE — visual rebuild matching reference screenshot
+   JUST DIVIDE — KID MODE
+   Layout is built on a fixed 1440x1024 "stage" (the assignment's
+   design resolution). main.js scales the stage to fit the window,
+   so every element keeps its position on any screen size.
+   Portrait screens switch to an 800x1280 stage.
    ========================================================= */
 
 :root {
   --teal-outer: #02707c;
-  --teal-cell: #058c99;
   --mint-border: #b7ecea;
-  --mint-border-soft: #cdf3f1;
 
   --panel-border: #e8974b;
   --panel-fill: #ffc94a;
-  --panel-fill-dark: #f5b93a;
 
-  --badge-top: #ea7568;
-  --badge-bottom: #d53d4a;
-  --badge-border: #b73621;
+  --badge-shadow: #9e0d08;
 
   --keep-top: #8ff2d2;
   --keep-bottom: #3fd9a8;
 
   --trash-top: #e2726a;
   --trash-bottom: #ab2c25;
-  --trash-border: #7a1e1a;
 
   --text-dark: #2b2b2b;
   --subtitle-orange: #ff7a45;
   --keep-label-color: #0b6b54;
   --trash-label-color: #e2382b;
 
-  --tile-pink-text: #dc2ac8;
-  --tile-blue-text: #167bdc;
-  --tile-orange-text: #cf3f09;
-  --tile-red-text: #cd0016;
-  --tile-purple-text: #992ef4;
+  --hint-color: #ffe600;
+  --shadow-soft: 0 6px 16px rgba(0, 0, 0, 0.16);
+  --merge-delay: 0.22s;
 
-  --shadow-soft: 0 6px 16px rgba(0, 0, 0, 0.12);
+  --font-main: "Trebuchet MS", "Segoe UI", Arial, Helvetica, sans-serif;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", "Trebuchet MS", Verdana, Arial, sans-serif;
+  font-family: var(--font-main);
 }
 
-html, body {
-  max-width: 100%;
-  overflow-x: hidden;
+/* Wallpaper fills the whole window (no side bars). */
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-  min-height: 100vh;
-  background: #f2f2f2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 24px;
-}
-
-/* =========================================================
-   GAME SHELL
-   ========================================================= */
-
-#game {
-  position: relative;
-  width: 100%;
-  max-width: 1040px;
-  padding: 40px 50px 46px;
+  background-color: #ffe3d9;
   background-image: url("assets/Desktop_JustDivide_Game_2.png");
   background-size: cover;
   background-position: center;
-  background-color: #ffe3d9;
+  background-repeat: no-repeat;
+}
 
-  border-radius: 28px;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
-  overflow: hidden;
+@media (orientation: landscape) and (max-width: 900px) {
+  body { background-image: url("assets/Landscape_JustDivide_Game_2.png"); }
+}
+
+@media (orientation: portrait) {
+  body { background-image: url("assets/Potraite_JustDivide_Game_2.png"); }
+}
+
+/* =========================================================
+   STAGE (scaled by main.js)
+   ========================================================= */
+
+#game {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1440px;
+  height: 1024px;
+  transform-origin: 0 0;
 }
 
 /* Icon buttons (pause / help / fullscreen) */
@@ -86,44 +86,47 @@ body {
   border: none;
   border-radius: 50%;
   cursor: pointer;
+  z-index: 10;              /* always above the full-width header */
   box-shadow: var(--shadow-soft);
   transition: transform 0.15s ease;
 }
 
-.icon-btn:hover {
-  transform: scale(1.06);
-}
+.icon-btn:hover { transform: scale(1.06); }
 
 .pause-btn {
-  top: 24px;
-  left: 30px;
-  width: 42px;
-  height: 42px;
+  top: 36px;
+  left: 40px;
+  width: 68px;
+  height: 68px;
   background: #8f6ff2;
   color: #ffffff;
 }
 
 .help-btn {
-  top: 24px;
-  right: 30px;
-  width: 38px;
-  height: 38px;
+  top: 36px;
+  right: 40px;
+  width: 64px;
+  height: 64px;
   background: #29c46a;
   color: #ffffff;
-  font-size: 19px;
+  font-size: 34px;
   font-weight: 800;
 }
 
 .fullscreen-btn {
-  bottom: 18px;
-  right: 22px;
-  width: 30px;
-  height: 30px;
+  bottom: 30px;
+  right: 40px;
+  width: 48px;
+  height: 48px;
   background: transparent;
   color: #3aa79a;
-  border: 2px dashed #7fd0c6;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: none;
+}
+
+:focus-visible {
+  outline: 4px solid #5b8cff;
+  outline-offset: 3px;
 }
 
 /* =========================================================
@@ -131,217 +134,239 @@ body {
    ========================================================= */
 
 .game-header {
+  position: absolute;
+  top: 22px;
+  left: 0;
+  width: 100%;
   text-align: center;
-  margin-bottom: 8px;
+  pointer-events: none;     /* never blocks the pause / help buttons */
 }
 
 .game-header h1 {
-  font-size: clamp(32px, 3.6vw, 44px);
+  font-size: 54px;
   font-weight: 900;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--text-dark);
+  line-height: 1.1;
 }
 
 .timer {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  margin-top: 6px;
-  font-size: clamp(16px, 1.6vw, 19px);
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 28px;
   font-weight: 700;
-  color: var(--text-dark);
-}
-
-.hourglass-icon {
   color: var(--text-dark);
 }
 
 .subtitle {
-  margin-top: 10px;
-  text-align: center;
-  font-size: clamp(14px, 1.4vw, 17px);
-  font-weight: 800;
+  margin: 14px auto 0;
+  max-width: 1100px;
+  font-size: 27px;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--subtitle-orange);
   text-shadow:
-    -1.5px -1.5px 0 #fff,
-    1.5px -1.5px 0 #fff,
-    -1.5px 1.5px 0 #fff,
-    1.5px 1.5px 0 #fff,
-    0 3px 3px rgba(0, 0, 0, 0.12);
+    -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff,
+    0 -2px 0 #fff, 0 2px 0 #fff, -2px 0 0 #fff, 2px 0 0 #fff,
+    0 4px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* =========================================================
-   CAT + LEVEL / SCORE BADGES
+   BOARD: grid frame + cat + Level/Score badges
+   (children are positioned relative to the board)
    ========================================================= */
 
-.cat-badges-row {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 18px;
+.board {
+  position: absolute;
+  left: 292px;
+  top: 325px;
+  width: 532px;
+  height: 604px;
 }
 
-.cat {
-  width: clamp(210px, 24vw, 300px);
-  height: auto;
+/* ---- 4x4 Grid (16 slots) ---- */
+.grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 110px);
+  grid-template-rows: repeat(4, 110px);
+  gap: 12px;
+  padding: 94px 22px 22px;
+
+  background: var(--teal-outer);
+  border: 6px solid var(--mint-border);
+  border-radius: 40px;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Each slot uses the supplied Placement_Box.svg (turquoise box, white border) */
+.cell {
   position: relative;
-  z-index: 3;
-  margin-bottom: -18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: url("assets/Placement_Box.svg") center / 100% 100% no-repeat;
+  transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.15s ease;
+}
+
+.cell.drag-over {
+  transform: scale(1.06);
+  filter: brightness(1.2);
+}
+
+/* Hint: empty slot where the current tile would merge */
+.cell.hint {
+  box-shadow: 0 0 0 5px var(--hint-color), 0 0 20px 6px rgba(255, 230, 0, 0.7);
+}
+
+/* ---- Cat ---- */
+.cat {
+  position: absolute;
+  left: 21px;
+  top: -120px;
+  width: 490px;
+  height: auto;
+  z-index: 5;
   pointer-events: none;
   user-select: none;
 }
 
-.score-area {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  justify-content: center;
-  gap: 130px;
-  width: 100%;
+/* ---- Level / Score badges (supplied badge art + live text) ---- */
+.badge {
+  position: absolute;
+  top: -25px;
+  width: 221px;
+  height: 110px;
+  z-index: 3;
 }
 
-.badge {
+.level-badge { left: -32px; }
+.score-badge { left: 358px; }
+
+.badge img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Sits exactly over the red face of the badge art */
+.badge-text {
+  position: absolute;
+  left: 5.3%;
+  top: 9%;
+  width: 83.4%;
+  height: 70%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-width: 150px;
-  padding: 13px 22px;
-  border-radius: 14px;
-
-  background: linear-gradient(180deg, var(--badge-top) 0%, var(--badge-bottom) 100%);
-  border: 3px solid var(--badge-border);
-  box-shadow: var(--shadow-soft), inset 0 2px 0 rgba(255, 255, 255, 0.35);
-
   color: #ffffff;
-  font-weight: 800;
-  font-size: clamp(17px, 1.8vw, 21px);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
   white-space: nowrap;
 }
 
-.badge-label {
-  font-weight: 800;
+.badge-line {
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 1px;
+  text-shadow:
+    -3px -3px 0 var(--badge-shadow), 3px -3px 0 var(--badge-shadow),
+    -3px 3px 0 var(--badge-shadow), 3px 3px 0 var(--badge-shadow),
+    0 -3px 0 var(--badge-shadow), 0 3px 0 var(--badge-shadow),
+    -3px 0 0 var(--badge-shadow), 3px 0 0 var(--badge-shadow);
 }
 
-.best-caption {
-  text-align: center;
-  margin-top: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(43, 43, 43, 0.55);
-}
+.badge-line strong { font-weight: 900; }
+
+/* Score badge has two lines (Score + Best) */
+.score-badge .badge-line { font-size: 27px; }
+.score-badge .badge-line-small { font-size: 22px; }
+
+.badge.bump { animation: badge-bump 0.35s ease; }
 
 /* =========================================================
-   MAIN GAME AREA: GRID + PANEL
+   TILES (supplied SVG art + centered number)
    ========================================================= */
 
-.game-area {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 46px;
-  margin-top: 20px;
-}
-
-/* ---- 4x4 Grid ---- */
-
-.grid {
-  width: clamp(300px, 34vw, 340px);
-  aspect-ratio: 1 / 1;
-
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 10px;
-  padding: 16px;
-
-  background: var(--teal-outer);
-  border: 6px solid var(--mint-border);
-  border-radius: 26px;
-  box-shadow: var(--shadow-soft);
-}
-
-.cell {
-  width: 100%;
-  height: 100%;
-  background: var(--teal-cell);
-  border: 3px solid var(--mint-border-soft);
-  border-radius: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  transition: background 0.15s ease, outline 0.15s ease;
-}
-
-.cell.drag-over {
-  background: #0aa3ae;
-}
-
-/* Tiles inside the grid */
 .tile {
-  width: 100%;
-  height: 100%;
-  border-radius: 12px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background-color: transparent;
+  position: relative;
+  width: 88%;
+  height: 88%;
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-
-  font-size: clamp(20px, 2.1vw, 30px);
-  font-weight: 900;
-  cursor: grab;
   user-select: none;
-  transition: transform 0.15s ease;
 }
 
-.tile:hover {
-  transform: scale(1.04);
+.tile-number {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
 
-.tile:active {
-  cursor: grabbing;
-  transform: scale(0.96);
+.tile-number text {
+  font-weight: 900;
+  font-family: var(--font-main);
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1.4px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
 }
 
-.tile-pink   { color: var(--tile-pink-text); }
-.tile-blue   { color: var(--tile-blue-text); }
-.tile-orange { color: var(--tile-orange-text); }
-.tile-red    { color: var(--tile-red-text); }
-.tile-purple { color: var(--tile-purple-text); }
+/* Animations */
+.tile-drop  { animation: tile-drop 0.28s ease-out; }
+.tile-merge { animation: tile-merge 0.4s ease-out var(--merge-delay) backwards; }
+.pop-in     { animation: pop-in 0.25s ease-out; }
 
-.tile {
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+/* Copy of a tile that just changed/vanished, drawn on top for the animation */
+.tile-ghost {
+  position: absolute;
+  inset: 6%;
+  width: auto;
+  height: auto;
+  pointer-events: none;
+  z-index: 2;
+  animation: tile-vanish 0.4s ease-in var(--merge-delay) forwards;
+}
+
+.tile-ghost.ghost-placed {
+  animation:
+    tile-drop 0.28s ease-out,
+    tile-vanish 0.4s ease-in var(--merge-delay) forwards;
 }
 
 /* =========================================================
-   RIGHT ACTION PANEL
+   RIGHT ACTION PANEL (KEEP, upcoming stack, TRASH)
    ========================================================= */
 
 .action-panel {
-  width: 150px;
-  padding: 22px 14px 20px;
+  position: absolute;
+  left: 954px;
+  top: 372px;
+  width: 154px;
+  height: 557px;
+  padding: 20px 10px 18px;
 
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
 
   background: var(--panel-fill);
   border: 10px solid var(--panel-border);
-  border-radius: 48px;
+  border-radius: 60px;
   box-shadow: var(--shadow-soft);
 }
 
@@ -352,38 +377,33 @@ body {
 }
 
 .panel-label {
-  margin-top: 8px;
-  font-size: 15px;
+  font-size: 26px;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  line-height: 1.2;
 }
 
-.keep-label { color: var(--keep-label-color); }
-.trash-label {
-  color: var(--trash-label-color);
-  margin-top: 0;
-  margin-bottom: 8px;
-}
+.keep-label  { color: var(--keep-label-color); margin-top: 8px; }
+.trash-label { color: var(--trash-label-color); margin-bottom: 8px; }
 
 /* Keep slot */
-.keep-slot {
-  width: 76px;
-  height: 76px;
-  border-radius: 18px;
-  background: linear-gradient(160deg, var(--keep-top) 0%, var(--keep-bottom) 100%);
-  border: 4px solid #ffffff;
-  box-shadow: var(--shadow-soft), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+.keep-slot,
+.trash-slot {
+  width: 100px;
+  height: 100px;
+  border-radius: 22px;
+  border: 5px solid #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, filter 0.15s ease;
 }
 
-.keep-slot:hover,
-.keep-slot.drag-over {
-  transform: scale(1.05);
+.keep-slot {
+  background: linear-gradient(160deg, var(--keep-top) 0%, var(--keep-bottom) 100%);
+  box-shadow: var(--shadow-soft), inset 0 3px 0 rgba(255, 255, 255, 0.5);
 }
 
 .keep-value {
@@ -394,134 +414,174 @@ body {
   justify-content: center;
 }
 
-.keep-value .tile {
-  width: 90%;
-  height: 90%;
-}
+.keep-value .tile { width: 86%; height: 86%; }
 
-/* Queue (NEXT tiles) — overlaps the panel edges like the reference */
+/* Upcoming stack: white tray that overlaps the panel edges, like the reference */
 .queue {
   position: relative;
   z-index: 4;
-  width: calc(100% + 20px);
-  margin: 14px 0;
-
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: center;
-  gap: 6px;
-
+  gap: 8px;
+  padding: 10px;
   background: #ffffff;
   border: 3px solid var(--mint-border);
-  border-radius: 16px;
-  padding: 7px;
+  border-radius: 20px;
   box-shadow: var(--shadow-soft);
 }
 
-.queue-tile {
-  width: 56px !important;
-  height: 56px !important;
-  min-width: 56px !important;
-  min-height: 56px !important;
+.queue .tile {
+  flex: none;
+  width: 82px;
+  height: 82px;
+}
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Top tile = draggable. The next two are greyed out and step back. */
+.queue .tile:not(.queue-active) { filter: grayscale(1); opacity: 0.9; }
+.queue .tile.queue-pos-2 { opacity: 0.7; transform: scale(0.92); }
 
-  border-radius: 12px;
+.queue .tile.queue-active {
   cursor: grab;
-  user-select: none;
-
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  font-size: 22px;
-  font-weight: 900;
-
-  transition: transform 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
-}
-
-.queue-tile:active {
-  cursor: grabbing;
-  transform: scale(0.95);
-}
-
-.queue-tile.next-active {
   transform: scale(1.05);
 }
 
-.queue-tile:not(.next-active) {
-  filter: grayscale(1);
-  opacity: 0.85;
-}
-
-/* Only the first two queue tiles are shown, matching the reference */
-.queue-tile:nth-child(n + 3) {
-  display: none;
-}
+.queue .tile.queue-active:active { cursor: grabbing; }
+.queue .tile.dragging { opacity: 0.35; }
 
 /* Trash slot */
 .trash-slot {
-  width: 76px;
-  height: 76px;
-  border-radius: 18px;
-
-  background: linear-gradient(160deg, var(--trash-top) 0%, var(--trash-bottom) 100%);
-  border: 4px solid #ffffff;
-  box-shadow: var(--shadow-soft), inset 0 2px 0 rgba(255, 255, 255, 0.4);
-
-  display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 2px;
-
+  background: linear-gradient(160deg, var(--trash-top) 0%, var(--trash-bottom) 100%);
+  box-shadow: var(--shadow-soft), inset 0 3px 0 rgba(255, 255, 255, 0.4);
   color: #ffffff;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-.trash-slot:hover,
-.trash-slot.drag-over {
-  transform: scale(1.05);
 }
 
 .trash-count {
-  font-size: 13px;
+  font-size: 22px;
   font-weight: 900;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
+
+.keep-slot:hover,
+.keep-slot.drag-over,
+.trash-slot:hover,
+.trash-slot.drag-over {
+  transform: scale(1.06);
+}
+
+.trash-slot.disabled {
+  filter: grayscale(0.85);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.trash-slot.disabled:hover { transform: none; }
+.trash-slot.shake { animation: shake 0.3s ease; }
 
 /* =========================================================
    CONTROLS
    ========================================================= */
 
 .controls {
-  text-align: center;
-  margin-top: 26px;
+  position: absolute;
+  top: 950px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
 }
 
 .controls button {
-  padding: 10px 18px;
-  margin: 0 6px;
+  padding: 12px 22px;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   background: #ffffff;
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-dark);
   cursor: pointer;
   box-shadow: var(--shadow-soft);
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
-.controls button:hover {
-  transform: translateY(-2px);
+.controls button:hover:not(:disabled) { transform: translateY(-2px); }
+
+.controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.controls button.on {
+  background: var(--hint-color);
+}
+
+.controls button.active {
+  background: var(--subtitle-orange);
+  color: #ffffff;
+}
+
+.controls kbd {
+  margin-left: 4px;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.09);
+  font-family: var(--font-main);
+  font-size: 0.7em;
+  font-weight: 800;
+}
+
+.controls .active kbd { background: rgba(255, 255, 255, 0.3); }
+
+.controls-divider {
+  width: 3px;
+  height: 34px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Paused state */
+#game.paused .board,
+#game.paused .action-panel,
+#game.paused .controls {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 /* =========================================================
-   MODALS (help + game over)
+   FLOATING SCORE TEXT
+   ========================================================= */
+
+.score-popup {
+  position: absolute;
+  top: -40px;
+  left: 462px;
+  z-index: 6;
+  transform: translateX(-50%);
+  font-size: 44px;
+  font-weight: 900;
+  color: #ffffff;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow:
+    -3px -3px 0 #d53d4a, 3px -3px 0 #d53d4a, -3px 3px 0 #d53d4a, 3px 3px 0 #d53d4a,
+    0 4px 6px rgba(0, 0, 0, 0.3);
+  animation: score-float 1s ease-out forwards;
+}
+
+.score-popup.level-up {
+  left: 266px;
+  top: 150px;
+  font-size: 54px;
+  color: #ffe600;
+}
+
+/* =========================================================
+   MODALS (help + game over) — full window, not scaled
    ========================================================= */
 
 .modal,
@@ -537,7 +597,7 @@ body {
 
 .modal-card,
 .game-over-card {
-  width: min(90vw, 380px);
+  width: min(90vw, 420px);
   background: #ffffff;
   padding: 32px;
   border-radius: 22px;
@@ -548,12 +608,12 @@ body {
 .modal-card h2,
 .game-over-card h2 {
   margin-bottom: 14px;
-  font-size: 26px;
+  font-size: 28px;
   color: var(--text-dark);
 }
 
 .modal-card p {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
   color: #444;
   margin-bottom: 18px;
@@ -564,77 +624,115 @@ body {
   padding: 12px 26px;
   border: none;
   border-radius: 12px;
-  background: var(--badge-bottom);
+  background: #d53d4a;
   color: #ffffff;
   font-weight: 800;
-  font-size: 15px;
+  font-size: 16px;
   cursor: pointer;
 }
 
 .game-over-card p {
-  margin: 6px 0;
-  font-size: 16px;
+  margin: 6px 0 12px;
+  font-size: 20px;
 }
 
-.hidden {
-  display: none !important;
+.game-over-card { animation: pop-in 0.3s ease-out; }
+
+.hidden { display: none !important; }
+
+/* =========================================================
+   KEYFRAMES
+   ========================================================= */
+
+@keyframes tile-drop {
+  0%   { transform: translateY(-60px) scale(1.25); opacity: 0; }
+  60%  { opacity: 1; }
+  80%  { transform: translateY(3px) scale(0.96); }
+  100% { transform: none; opacity: 1; }
 }
 
-/* Paused state */
-#game.paused .game-area,
-#game.paused .controls {
-  opacity: 0.5;
-  pointer-events: none;
+@keyframes tile-merge {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.22); opacity: 1; filter: brightness(1.25); }
+  100% { transform: scale(1); filter: none; }
+}
+
+@keyframes tile-vanish {
+  0%   { transform: scale(1); opacity: 1; }
+  30%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.1) rotate(25deg); opacity: 0; }
+}
+
+@keyframes pop-in {
+  0%   { transform: scale(0.6); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+@keyframes score-float {
+  0%   { opacity: 0; transform: translate(-50%, 0) scale(0.7); }
+  20%  { opacity: 1; transform: translate(-50%, -10px) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1); }
+}
+
+@keyframes badge-bump {
+  0%, 100% { transform: scale(1); }
+  40%      { transform: scale(1.1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01s !important;
+  }
 }
 
 /* =========================================================
-   RESPONSIVE
+   PORTRAIT STAGE (800x1280): panel moves under the grid
    ========================================================= */
 
-@media (max-width: 900px) {
+@media (orientation: portrait) {
   #game {
-    padding: 30px 20px 34px;
+    width: 800px;
+    height: 1280px;
   }
 
-  .score-area {
-    gap: 60px;
-  }
+  .game-header h1 { font-size: 46px; }
+  .timer { font-size: 24px; }
+  .subtitle { font-size: 22px; max-width: 700px; }
 
-  .game-area {
-    gap: 24px;
-  }
-}
+  .pause-btn { width: 60px; height: 60px; top: 30px; left: 30px; }
+  .help-btn { width: 56px; height: 56px; top: 30px; right: 30px; font-size: 30px; }
+  .fullscreen-btn { top: 34px; bottom: auto; right: 100px; width: 44px; height: 44px; }
 
-@media (max-width: 640px) {
-  .game-area {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .grid {
-    width: min(86vw, 340px);
-  }
+  .board { left: 134px; top: 355px; }
 
   .action-panel {
-    width: min(70vw, 260px);
+    left: 50px;
+    top: 1000px;
+    width: 700px;
+    height: 190px;
+    padding: 12px 36px;
     flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 14px;
-    border-radius: 30px;
+    border-radius: 60px;
   }
 
-  .queue {
-    width: 100%;
-    margin: 0;
-    order: 3;
+  /* Both labels sit above their slots in the horizontal panel */
+  .keep-section { flex-direction: column-reverse; }
+  .keep-label { margin: 0 0 8px; }
+
+  .controls {
+    top: 1215px;
+    gap: 8px;
   }
 
-  .score-area {
-    gap: 24px;
-  }
-
-  .cat {
-    width: 170px;
-  }
+  .controls button { padding: 10px 12px; font-size: 16px; }
+  .controls kbd { display: none; }
+  .controls-divider { height: 28px; }
 }
